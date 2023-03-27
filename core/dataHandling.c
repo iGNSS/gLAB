@@ -4385,7 +4385,7 @@ int getMeasModelValue (TEpoch *epoch, enum GNSSystem system, int PRN, enum Measu
 	// Check if measurement is usable
 	if ( !epoch->measOrder[system].usable[measType] ) usable = 0;
 
-	if ( measType < ENDMEAS ) { // It is a measurement and NOT a combination
+	if ( measType < ENDMEAS_NEW ) { // It is a measurement and NOT a combination
 		// If it is a receiver type, that does not has P1, use C1 instead
 		if ( epoch->receiver.recType == rtNOP1 && measType == C1P ) { 
 			measType = C1C;

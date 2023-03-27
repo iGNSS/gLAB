@@ -12,7 +12,7 @@
                 "-input:cfg",
                 "${workspaceFolder}/meas.cfg",
                 "-input:obs",
-                "../data/OBE400DEU_R_20223530000_01D_30S_MO.rnx"
+                "../data/C102-F9R.obs",
                 "--pre:prealign"
             ],
             "stopAtEntry": false,
