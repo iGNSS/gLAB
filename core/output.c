@@ -1374,7 +1374,7 @@ void printMeas (TEpoch *epoch, TTGDdata *tgdData, TOptions *options) {
 	int						len;
 	enum MeasurementType	measChain[MAX_GNSS][MAX_MEASUREMENTS_PER_SATELLITE*2];
 	double					measVal;
-	char					mS[2][4];
+	char					mS[4];
 	int						res;
 	double					correction1;
 	int						retDCB,retDCBC1P1;
@@ -1384,21 +1384,19 @@ void printMeas (TEpoch *epoch, TTGDdata *tgdData, TOptions *options) {
 			n[i] = 0;
 			measStr[i][0] = '\0';
 			len = 0;
-			for (j=1;j<ENDMEAS;j+=4) {
+			for (j=1;j<ENDMEAS_NEW;j++) {
 				// j=1 is a pseudorange, and then pseudoranges come every 4 identifiers.
 				// See the "enum MeasurementType" enumerator at dataHandling.h file for
 				// more details 
-				if (epoch->measOrder[i].meas2Ind[j]!=-1 || epoch->measOrder[i].meas2Ind[j+1]!=-1) {
+				if (epoch->measOrder[i].meas2Ind[j]!=-1) {
 					// See if the Pseudorange OR the associated Carrier Phase (j+1) are available
 					measChain[i][n[i]] = j;
-					measChain[i][n[i]+1] = j+1;
-					n[i]+=2;
-					strcpy(mS[0], meastype2measstr(j));
-					strcpy(mS[1], meastype2measstr(j+1));
+					n[i]+=1;
+					strcpy(mS, meastype2measstr(j));
 					if (len!=0) {
 						len += sprintf(&measStr[i][len],":");
 					}
-					len += sprintf(&measStr[i][len],"%s:%s",mS[0],mS[1]);
+					len += sprintf(&measStr[i][len],"%s",mS);
 				}
 			}
 			if (n[i]>maxN) maxN = n[i];
