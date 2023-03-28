@@ -1384,15 +1384,12 @@ void printMeas (TEpoch *epoch, TTGDdata *tgdData, TOptions *options) {
 			n[i] = 0;
 			measStr[i][0] = '\0';
 			len = 0;
-			for (j=1;j<ENDMEAS_NEW;j++) {
-				// j=1 is a pseudorange, and then pseudoranges come every 4 identifiers.
-				// See the "enum MeasurementType" enumerator at dataHandling.h file for
-				// more details 
-				if (epoch->measOrder[i].meas2Ind[j]!=-1) {
-					// See if the Pseudorange OR the associated Carrier Phase (j+1) are available
-					measChain[i][n[i]] = j;
+			for (j=0;j<MAX_MEASUREMENTS_PER_SATELLITE;j++) {
+				enum MeasurementType type = epoch->measOrder[i].ind2Meas[j]; 
+				measChain[i][n[i]] = type;
+				if (type != NA) {
 					n[i]+=1;
-					strcpy(mS, meastype2measstr(j));
+					strcpy(mS, meastype2measstr(type));
 					if (len!=0) {
 						len += sprintf(&measStr[i][len],":");
 					}
