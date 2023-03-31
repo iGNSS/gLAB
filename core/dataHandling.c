@@ -27,7 +27,7 @@
  *             Jesus Romero Sanchez ( gAGE/UPC )
  *          glab.gage @ upc.edu
  * File: dataHandling.c
- * Code Management Tool File Version: 5.5  Revision: 1
+ * Code Management Tool File Version: 5.5  Revision: 2
  * Date: 2020/12/11
  ***************************************************************************/
 
@@ -4385,7 +4385,7 @@ int getMeasModelValue (TEpoch *epoch, enum GNSSystem system, int PRN, enum Measu
 	// Check if measurement is usable
 	if ( !epoch->measOrder[system].usable[measType] ) usable = 0;
 
-	if ( measType < ENDMEAS_NEW ) { // It is a measurement and NOT a combination
+	if ( (measType < ENDMEAS) || ((measType >= S3Q) && (measType < ENDMEAS_NEW)) ) { // It is a measurement and NOT a combination
 		// If it is a receiver type, that does not has P1, use C1 instead
 		if ( epoch->receiver.recType == rtNOP1 && measType == C1P ) { 
 			measType = C1C;

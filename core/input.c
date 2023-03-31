@@ -27,7 +27,7 @@
  *             Jesus Romero Sanchez ( gAGE/UPC ) 
  *          glab.gage @ upc.edu
  * File: input.c
- * Code Management Tool File Version: 5.5  Revision: 1
+ * Code Management Tool File Version: 5.5  Revision: 2
  * Date: 2020/12/11
  ***************************************************************************/
 
@@ -2317,22 +2317,21 @@ int readRinexObsHeader (FILE *fd, FILE *fdout, TEpoch *epoch, TOptions *options)
 			getstr(aux,line,1,5);
 			if ( actSysObs==QZSS || actSysObs==IRNSS || (( prevSysObs==QZSS || prevSysObs==IRNSS ) && aux[0]=='\0') ) {continue;} //QZSS, IRNSS are not supported
 			//numLinesTypesofObsr++;
-			if (aux[0]!='\0') { // if this is the first line of a SYS
+			//if (aux[0]!='\0') { // if this is the first line of a SYS
 			//if (numLinesTypesofObsr==1 || actSysObs!=prevSysObs) { // if this is the first line of a SYS
 			//if (numLinesTypesofObsr==1  ) { // if this is the first line of a SYS
-				int gnsstype = gnsschar2gnsstype(line[0]);
-				epoch->measOrder[gnsstype].nDiffMeasurements = atoi(aux);
+				//epoch->measOrder[epoch->numGNSS].nDiffMeasurements = atoi(aux);
 				//epoch->measOrder[actSysObs].nDiffMeasurements = atoi(aux);
 				//epoch->measOrder[epoch->numGNSS].GNSS = gnsschar2gnsstype(line[0]);
-				epoch->measOrder[gnsstype].GNSS = gnsstype;
-				epoch->numGNSS = gnsstype + 1;
-				obs = 0;
-			//}}
-			}
-			//epoch->measOrder[actSysObs].nDiffMeasurements = atoi(aux);
-			//epoch->measOrder[actSysObs].GNSS = actSysObs;
+				//epoch->measOrder[epoch->numGNSS].GNSS = actSysObs;
+				//epoch->measOrder[actSysObs].GNSS = actSysObs;
+				//epoch->numGNSS++;
+				//obs = 0;
+			//}}}
+			epoch->measOrder[actSysObs].nDiffMeasurements = atoi(aux);
+			epoch->measOrder[actSysObs].GNSS = actSysObs;
 			//epoch->numGNSS++;
-			//obs = 0;
+			obs = 0;
 
 		
 			//Initialize meas2Ind factor, so previous index are not maintained when reading concatenated files
