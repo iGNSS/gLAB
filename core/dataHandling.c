@@ -27,7 +27,7 @@
  *             Jesus Romero Sanchez ( gAGE/UPC )
  *          glab.gage @ upc.edu
  * File: dataHandling.c
- * Code Management Tool File Version: 5.5  Revision: 1
+ * Code Management Tool File Version: 5.5  Revision: 2
  * Date: 2020/12/11
  ***************************************************************************/
 
@@ -365,7 +365,6 @@ extern char printbufferSBASUNSEL[MAX_SATELLITES_VIEWED][MAX_INPUT_LINE];
 extern int  linesstoredSATSEL[MAX_SATELLITES_VIEWED];
 extern char printbufferSATSEL[MAX_SATELLITES_VIEWED][MAX_LINES_BUFFERED][MAX_INPUT_LINE];
 
-extern int	ReadL1CAsItself;
 const double EGM96grid[181][361];
 
 /**************************************
@@ -3650,12 +3649,12 @@ enum MeasurementType measstr2meastype (char *str) {
 	//first time the static variables are initialized, therefore there will be no race conditions
 
 	static int	initialized = 0;
-	static enum MeasurementType	s2t[7][10][16];
+	static enum MeasurementType	s2t[7][11][16];
 	int 		a1,a2,a3;
 
 	if (!initialized) {
 		for (a1=0;a1<7;a1++) {
-			for (a2=0;a2<10;a2++) {
+			for (a2=0;a2<11;a2++) {
 				for (a3=0;a3<16;a3++) {
 					s2t[a1][a2][a3] = NA;
 				}
@@ -3720,6 +3719,27 @@ enum MeasurementType measstr2meastype (char *str) {
 		s2t[2][5][0] = D8X; // D8
 		s2t[3][5][0] = S8X; // S8
 
+		s2t[3][10][10] = S3Q;//needed for new RINEX signal types used e.g. by OBE IGS station rnx
+		s2t[0][1][5] = C2I;
+		s2t[0][2][9] = C5P;
+		s2t[0][3][5] = C6I;
+		s2t[0][4][4] = C7D;
+		s2t[2][1][5] = D2I;
+		s2t[2][2][9] = D5P;
+		s2t[2][3][5] = D6I;
+		s2t[2][4][4] = D7D;
+		s2t[1][1][5] = L2I;
+		s2t[1][2][9] = L5P;
+		s2t[1][3][5] = L6I;
+		s2t[1][4][4] = L7D;
+		s2t[3][1][5] = S2I;
+		s2t[3][2][9] = S5P;
+		s2t[3][3][5] = S6I;
+		s2t[3][4][4] = S7D;
+		s2t[0][10][10] = C3Q;
+		s2t[2][10][10] = D3Q;
+		s2t[1][10][10] = L3Q;
+
 		initialized = 1;
 	}
 
@@ -3742,6 +3762,7 @@ enum MeasurementType measstr2meastype (char *str) {
 	else if (str[1]=='I') a2=7;
 	else if (str[1]=='C') a2=8;
 	else if (str[1]=='F') a2=9;
+	else if (str[1]=='3') a2=10;
 	else return NA;
 
 	if (str[2]=='\0') a3=0;
@@ -3762,7 +3783,6 @@ enum MeasurementType measstr2meastype (char *str) {
 	else if (str[2]=='Z') a3=15;
 	else return NA;
 	
-	if (strncmp(str,"L1C",3)==0 && ReadL1CAsItself==0) {return s2t[1][0][0];} //Trick to make gLAB believe L1C is L1P 
 	return s2t[a1][a2][a3];
 }
 
@@ -3858,6 +3878,66 @@ char *meastype2measstr (enum MeasurementType meas) {
 				break;
 			case 150:
 				strcpy(str,"DF");
+				break;
+			case 151:
+				strcpy(str,"S3Q");
+				break;
+			case 152:
+				strcpy(str,"C5P");
+				break;
+			case 153:
+				strcpy(str,"C6I");
+				break;
+			case 154:
+				strcpy(str,"C7D");
+				break;
+			case 155:
+				strcpy(str,"D2I");
+				break;
+			case 156:
+				strcpy(str,"D5P");
+				break;
+			case 157:
+				strcpy(str,"D6I");
+				break;
+			case 158:
+				strcpy(str,"D7D");
+				break;
+			case 159:
+				strcpy(str,"L2I");
+				break;
+			case 160:
+				strcpy(str,"L5P");
+				break;
+			case 161:
+				strcpy(str,"L6I");
+				break;
+			case 162:
+				strcpy(str,"L7D");
+				break;
+			case 163:
+				strcpy(str,"S2I");
+				break;
+			case 164:
+				strcpy(str,"S5P");
+				break;
+			case 165:
+				strcpy(str,"S6I");
+				break;
+			case 166:
+				strcpy(str,"S7D");
+				break;
+			case 167:
+				strcpy(str,"C3Q");
+				break;
+			case 168:
+				strcpy(str,"D3Q");
+				break;
+			case 169:
+				strcpy(str,"L3Q");
+				break;
+			case 170:
+				strcpy(str,"C2I");
 				break;
 			default:
 				return str;
@@ -4305,7 +4385,7 @@ int getMeasModelValue (TEpoch *epoch, enum GNSSystem system, int PRN, enum Measu
 	// Check if measurement is usable
 	if ( !epoch->measOrder[system].usable[measType] ) usable = 0;
 
-	if ( measType < ENDMEAS ) { // It is a measurement and NOT a combination
+	if ( (measType < ENDMEAS) || ((measType >= S3Q) && (measType < ENDMEAS_NEW)) ) { // It is a measurement and NOT a combination
 		// If it is a receiver type, that does not has P1, use C1 instead
 		if ( epoch->receiver.recType == rtNOP1 && measType == C1P ) { 
 			measType = C1C;

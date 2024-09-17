@@ -27,7 +27,7 @@
  *             Jesus Romero Sanchez ( gAGE/UPC )
  *          glab.gage @ upc.edu
  * File: dataHandling.h
- * Code Management Tool File Version: 5.5  Revision: 1
+ * Code Management Tool File Version: 5.5  Revision: 2
  * Date: 2020/12/11
  ***************************************************************************/
 
@@ -303,7 +303,7 @@
 #define MAX_INTERPOLATION_DEGREE				19
 #define MAX_RECEIVER_NAME						60
 #define MAX_ANTENNA_NAME						60
-#define MAX_MEASUREMENTS						151
+#define MAX_MEASUREMENTS						171
 
 #define MAX_CS_MEMORY							20
 #define MAX_FILTER_MEASUREMENTS					4
@@ -396,6 +396,12 @@
 #define GALl6									(cf0/GALmf6)
 #define SBASl1									(cf0/SBASmf1)
 #define SBASl5									(cf0/SBASmf5)
+#define BDSl1_2									(c0/1561098)
+#define BDSl1									(c0/1575420)
+#define BDSl2a									(c0/1176450)
+#define BDSl2b									(c0/1207140)
+#define BDSl2									(c0/1191795)
+#define BDSl3									(c0/1268520)
 
 #define GAMMAGPS12								((GPSf1*GPSf1)/(GPSf2*GPSf2))
 #define ALPHAGPS12								(1/(GAMMAGPS12-1))
@@ -854,7 +860,28 @@ enum MeasurementType {
 	G1P = 147,			// GPS         GRAPHIC combination between P1 and L1 (P1+L1)/2
 	G2C = 148,			// GPS         GRAPHIC combination between C2 and L2 (C2+L2)/2
 	G2P = 149,			// GPS         GRAPHIC combination between P2 and L2 (P2+L2)/2
-	DF = 150			// GPS         Divergence Free L1 + 2/((f1/f2)^2-1) * (L1-L2)
+	DF = 150,			// GPS         Divergence Free L1 + 2/((f1/f2)^2-1) * (L1-L2)
+	S3Q = 151,			// needed for OBE station input
+	C5P = 152,			// needed for OBE station input
+	C6I = 153,			// needed for OBE station input
+	C7D = 154,			// needed for OBE station input
+	D2I = 155,			// needed for OBE station input
+	D5P = 156,			// needed for OBE station input
+	D6I = 157,			// needed for OBE station input
+	D7D = 158,			// needed for OBE station input
+	L2I = 159,			// needed for OBE station input
+	L5P = 160,			// needed for OBE station input
+	L6I = 161,			// needed for OBE station input
+	L7D = 162,			// needed for OBE station input
+	S2I = 163,			// needed for OBE station input
+	S5P = 164,			// needed for OBE station input
+	S6I = 165,			// needed for OBE station input
+	S7D = 166,			// needed for OBE station input
+	C3Q = 167,			// needed for OBE station input
+	D3Q = 168,			// needed for OBE station input
+	L3Q = 169,			// needed for OBE station input
+	C2I = 170,			// needed for OBE station input
+	ENDMEAS_NEW = 171		// New Internal marker for combinations
 };
 
 // Enumerator for different kind of measurements

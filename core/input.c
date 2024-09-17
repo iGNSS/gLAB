@@ -27,7 +27,7 @@
  *             Jesus Romero Sanchez ( gAGE/UPC ) 
  *          glab.gage @ upc.edu
  * File: input.c
- * Code Management Tool File Version: 5.5  Revision: 1
+ * Code Management Tool File Version: 5.5  Revision: 2
  * Date: 2020/12/11
  ***************************************************************************/
 
@@ -2264,9 +2264,15 @@ int readRinexObsHeader (FILE *fd, FILE *fdout, TEpoch *epoch, TOptions *options)
 								if (aux[1]=='1') epoch->measOrder[k].conversionFactor[meas] = SBASl1;
 								else if(aux[1]=='5') epoch->measOrder[k].conversionFactor[meas] = SBASl5;
 								else epoch->measOrder[k].conversionFactor[meas] = 1.0; //For the case of frequencies that are not in this constellation
-							} else if (epoch->measOrder[k].GNSS==GLONASS) {
-								//Conversion factor not implented for GLONASS
-								epoch->measOrder[k].conversionFactor[meas] = 1.0; 
+							} else if (epoch->measOrder[k].GNSS==BDS) {
+								if (aux[1]=='2') epoch->measOrder[k].conversionFactor[meas] = BDSl1_2;
+								else if (aux[1]=='1') epoch->measOrder[k].conversionFactor[meas] = BDSl1;
+								else if (aux[1]=='5') epoch->measOrder[k].conversionFactor[meas] = BDSl2a;
+								else if (aux[1]=='7') epoch->measOrder[k].conversionFactor[meas] = BDSl2b;
+								else if (aux[1]=='8') epoch->measOrder[k].conversionFactor[meas] = BDSl2;
+								else if (aux[1]=='6') epoch->measOrder[k].conversionFactor[meas] = BDSl3;
+							} else { // If measurement in not from one of these GNSS above, conversionFactor is 1 as a workaround (for GLONASS you would need a frequency number from navigation frame to be correct...)
+								epoch->measOrder[k].conversionFactor[meas] = 1.0;
 							}
 						} else { // If measurement is not carrier-phase, conversionFactor is 1
 							epoch->measOrder[k].conversionFactor[meas] = 1.0;
@@ -2309,7 +2315,7 @@ int readRinexObsHeader (FILE *fd, FILE *fdout, TEpoch *epoch, TOptions *options)
 			prevSysObs = actSysObs;
 			actSysObs = gnsschar2gnsstype(line[0]); 
 			getstr(aux,line,1,5);
-			if ( actSysObs==BDS || actSysObs==QZSS || actSysObs==IRNSS || ((prevSysObs==BDS || prevSysObs==QZSS || prevSysObs==IRNSS ) && aux[0]=='\0') ) {continue;} //BeiDou, QZSS, IRNSS are not supported
+			if ( actSysObs==QZSS || actSysObs==IRNSS || (( prevSysObs==QZSS || prevSysObs==IRNSS ) && aux[0]=='\0') ) {continue;} //QZSS, IRNSS are not supported
 			//numLinesTypesofObsr++;
 			//if (aux[0]!='\0') { // if this is the first line of a SYS
 			//if (numLinesTypesofObsr==1 || actSysObs!=prevSysObs) { // if this is the first line of a SYS
@@ -2363,10 +2369,15 @@ int readRinexObsHeader (FILE *fd, FILE *fdout, TEpoch *epoch, TOptions *options)
 						} else if (epoch->measOrder[actSysObs].GNSS==GEO) {
 							if (aux[1]=='1') epoch->measOrder[actSysObs].conversionFactor[meas] = SBASl1;
 							else if(aux[1]=='5') epoch->measOrder[actSysObs].conversionFactor[meas] = SBASl5;
-							else epoch->measOrder[k].conversionFactor[meas] = 1.0;
-						} else {
-							//Other constellations (GLONASS, BeiDou).
-							//To be done. Now we apply conversion factor of 1
+							else epoch->measOrder[actSysObs].conversionFactor[meas] = 1.0;
+						} else if (epoch->measOrder[actSysObs].GNSS==BDS) {
+							if (aux[1]=='2') epoch->measOrder[actSysObs].conversionFactor[meas] = BDSl1_2;
+							else if (aux[1]=='1') epoch->measOrder[actSysObs].conversionFactor[meas] = BDSl1;
+							else if (aux[1]=='5') epoch->measOrder[actSysObs].conversionFactor[meas] = BDSl2a;
+							else if (aux[1]=='7') epoch->measOrder[actSysObs].conversionFactor[meas] = BDSl2b;
+							else if (aux[1]=='8') epoch->measOrder[actSysObs].conversionFactor[meas] = BDSl2;
+							else if (aux[1]=='6') epoch->measOrder[actSysObs].conversionFactor[meas] = BDSl3;
+						} else { // If measurement in not from one of these GNSS above, conversionFactor is 1 as a workaround (for GLONASS you would need a frequency number from navigation frame to be correct...)
 							epoch->measOrder[actSysObs].conversionFactor[meas] = 1.0;
 						}
 					} else { // If measurement in not carrier-phase, conversionFactor is 1
@@ -3046,16 +3057,9 @@ int readRinexObsEpoch (FILE *fd, TEpoch *epoch, TConstellation *constellation, e
 					j = 0;
 				}
 				cons = line[32+3*j];
+				epoch->sat[i].GNSS = gnsschar2gnsstype(cons);
 				getstr(aux,line,33+3*j,2);
 				epoch->sat[i].PRN = atoi(aux);
-				if (cons=='G' || cons==' ')
-					epoch->sat[i].GNSS = GPS;
-				else if (cons=='S')
-					epoch->sat[i].GNSS = GEO;
-				else if (cons=='R')
-					epoch->sat[i].GNSS = GLONASS;
-				else if (cons=='E')
-					epoch->sat[i].GNSS = Galileo;
 			}
 			for (i=0;i<epoch->numSatellites;i++) { // Get satellite measurements
 				if (getL(line,&len,fd)==-1) error = 1;
@@ -3240,7 +3244,7 @@ int readRinexObsEpoch (FILE *fd, TEpoch *epoch, TConstellation *constellation, e
 			for (i=0;i<epoch->numSatellites;i++) { // Get satellite measurements and PRNs
 				if (getL(line,&len,fd)==-1) error = 1;
 				epoch->sat[i-notSupportedSatellites].GNSS = gnsschar2gnsstype(line[0]);
-				if ( epoch->sat[i-notSupportedSatellites].GNSS==BDS || epoch->sat[i-notSupportedSatellites].GNSS==QZSS || epoch->sat[i-notSupportedSatellites].GNSS==IRNSS ) { //BeiDou, QZSS, IRNSS are not supported
+				if ( epoch->sat[i-notSupportedSatellites].GNSS==QZSS || epoch->sat[i-notSupportedSatellites].GNSS==IRNSS ) { //BeiDou, QZSS, IRNSS are not supported
 					notSupportedSatellites++;
 					continue; 
 				}	
